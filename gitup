@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require 'ostruct'
+require 'yaml'
+
+GITUP_ROOT = "#{File.expand_path('..', __FILE__)}"
+GITUP_CONFIG_FILE = "#{GITUP_ROOT}/config.yml"
+begin
+  GITUP_CONFIG = YAML.load_file(GITUP_CONFIG_FILE)
+rescue Errno::ENOENT
+  puts "There is not #{GITUP_ROOT}/config.yml, use only command options"
+  GITUP_CONFIG = {}
+end
+
+@available_subcommand = Dir.entries("#{GITUP_ROOT}/subcommands").select { |f|
+  File.file?(File.join("#{GITUP_ROOT}/subcommands",f))
+}.map {|f| f.gsub("\.rb", "")}
+
+def puts_available_subcommand
+  puts "The available commands are:"
+  @available_subcommand.each do |f|
+    puts "\t#{f.gsub("\.rb", "")}"
+  end
+end
+
+subcommand = ARGV.shift
+if ["--help", "-h", "", nil].include? subcommand
+  puts "usage: gitup [-h|--help] <command> [<args>]"
+  puts ""
+  puts_available_subcommand
+  exit
+end
+
+unless @available_subcommand.include? subcommand
+  puts "ERROR: Unknown subcommand #{subcommand}"
+  puts ""
+  puts_available_subcommand
+  exit
+end
+
+subcommand_file = File.expand_path("../subcommands/#{subcommand}.rb", __FILE__)
+require subcommand_file
+
