@@ -1,0 +1,22 @@
+available_servers: ['dev_server']
+                     # available server host to upload
+editor: "subl"       # for edit config file
+
+default: &default
+  user: "scp_user"
+  dir: "project_dir_of_remote_server"
+  server: "remote_server_to_upload"
+  logfile: "log_file_path_from_[dir]_to_tail_log"
+  restart_cmd: "command_to_restart_server"
+  start_cmd: "command_to_start_server"
+  stop_cmd: "command_to_stop_server"
+  restart: false     # optional
+  tailog: false      # optional
+  untracked: false   # optional
+
+predefine:
+  dev_server:
+    <<: *default
+  stage_server:
+    <<: *default
+    server: "stage_server"
