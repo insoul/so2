@@ -180,11 +180,11 @@ end
 opts.parse!(ARGV)
 
 if command_options.predefine
-  if GITUP_CONFIG[command_options.predefine].nil?
+  if GITUP_CONFIG["predefine"][command_options.predefine].nil?
     puts "ERROR: '#{command_options.predefine}' is not pre-defined in '#{GITUP_CONFIG_FILE}'\n"
     exit
   end
-  options.set(GITUP_CONFIG[command_options.predefine])
+  options.set(GITUP_CONFIG["predefine"][command_options.predefine])
 else
   options.set(GITUP_CONFIG['default'])
 end
