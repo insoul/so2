@@ -219,7 +219,12 @@ end
 
 puts "Parsing git status And Upload"
 js_changed = false
-status = `git diff --name-status #{options.commit}`
+if options.commit
+  status = `git diff --name-status #{options.commit}`
+else
+  status = `git diff --name-status`
+  status << `git diff --name-status --cached`
+end
 puts status
 
 status.split(/(\r\n|\r|\n)/).each do |st|
