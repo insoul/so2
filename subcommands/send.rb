@@ -170,6 +170,7 @@ Usage: gitup send [options]
     command_options.tailog = f
   end
   opts.on_tail('-h', "--help", "Show this message") do
+    puts opts.banner
     exit
   end
   opts.on("-p", "--predefine NUMBER", "Predefined option") do |f|
