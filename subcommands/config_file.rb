@@ -1,1 +1,1 @@
-puts File.expand_path("../../config.yml", __FILE__)
+puts GITUP_CONFIG_FILE

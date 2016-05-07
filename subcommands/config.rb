@@ -5,9 +5,9 @@ opts = OptionParser.new do |opts|
   opts.banner = <<-EOS
 Usage: gitup config [-e|--edit]
   By default, show #{GITUP_CONFIG_FILE}
-  
+
   edit options:
-    run #{GITUP_CONFIG_FILE} with 
+    run #{GITUP_CONFIG_FILE} with
   EOS
 
   opts.on("-e", "--edit") do |f|
@@ -17,7 +17,7 @@ end
 
 opts.parse(ARGV)
 
-editor = GITUP_CONFIG["editor"] || "mate"
+editor = GITUP_SETTING["editor"] || "vim"
 if command_options.edit
   `#{editor} #{GITUP_CONFIG_FILE}`
 else

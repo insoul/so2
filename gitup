@@ -4,11 +4,19 @@ require 'ostruct'
 require 'yaml'
 
 GITUP_ROOT = "#{File.expand_path('..', __FILE__)}"
-GITUP_CONFIG_FILE = "#{GITUP_ROOT}/config.yml"
+GITUP_SETTING_FILE = "#{GITUP_ROOT}/setting.yml"
+begin
+  GITUP_SETTING = YAML.load_file(GITUP_SETTING_FILE)
+rescue Errno::ENOENT
+  puts "There is not #{GITUP_SETTING_FILE}"
+  exit
+end
+
+GITUP_CONFIG_FILE = "#{Dir.pwd}/.gitup.yml"
 begin
   GITUP_CONFIG = YAML.load_file(GITUP_CONFIG_FILE)
 rescue Errno::ENOENT
-  puts "There is not #{GITUP_ROOT}/config.yml, use only command options"
+  puts "There is not #{GITUP_CONFIG_FILE}"
   GITUP_CONFIG = {}
 end
 
@@ -40,4 +48,3 @@ end
 
 subcommand_file = File.expand_path("../subcommands/#{subcommand}.rb", __FILE__)
 require subcommand_file
-

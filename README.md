@@ -5,9 +5,9 @@ echo 'export PATH=~/.gitup:$PATH' >> ~/.bash_profile
 ```
 # Configuration
 ```bash
-cp ~/.gitup/config.yml.example ~/.gitup/config.yml`
+cp ~/.gitup/gitup.yml.example ~/project/.gitup.yml`
 ```
-Edit `~/.gitup/config.yml`
+Edit `~/project/.gitup.yml`
 
 # Usage
 ```bash
@@ -15,4 +15,3 @@ gitup send
 
 gitup send --server dev_server --restart
 ```
-

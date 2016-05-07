@@ -18,9 +18,9 @@ class Option
   OPTION_NAMES = %w{
     server dir logfile
     restart_cmd start_cmd stop_cmd
-    restart tailog untracked
+    restart tailog ignore_untracked
   }
-  
+
   def initialize(options)
     @options = OpenStruct.new
     set(options)
@@ -33,7 +33,7 @@ class Option
     @options.send("#{key}=", value)
     true
   end
-  
+
   def set(options)
     if options.is_a? Hash
       OPTION_NAMES.each do |o|
@@ -61,18 +61,27 @@ class Option
     end
   end
 
+  def ssh_opt
+    opt = ''
+    if @options.pem
+      pem = @options.pem.gsub(/\$HOME/, ENV['HOME'])
+      opt += "-i #{pem}"
+    end
+    opt
+  end
+
   def ssh(command)
-    system("ssh #{address} 'cd #{@options.dir}; #{command}'")
+    system("ssh #{ssh_opt} #{address} 'cd #{@options.dir}; #{command}'")
   end
 
   def out(command)
-    `ssh #{address} 'cd #{@options.dir}; #{command}'`
+    `ssh #{ssh_opt} #{address} 'cd #{@options.dir}; #{command}'`
   end
 
   def scp(file)
-    system("scp #{file} #{address}:#{@options.dir}/#{file}")
+    system("scp #{ssh_opt} #{file} #{address}:#{@options.dir}/#{file}")
   end
-  
+
   def print
     puts "Current options"
     OPTION_NAMES.each do |o|
@@ -87,30 +96,10 @@ options = Option.new(GITUP_CONFIG["default"])
 command_options = OpenStruct.new
 opts = OptionParser.new do |opts|
   opts.banner = <<-EOS
-  
-Usage: gitup send [options]
 
-  server, dir options:
-    these options are to define where to upload server.
-    server option has no default and dir option has default, 'me2day/current'.
-    if you want to set default, make [~/tmp/instant.yml]
-    and set default options like this,
-
-      server: dev.server.com
-      dir: deploy/stage
-      logfile: unicorn.stdout.log
-
-    this default value be overwritten by command line option.
-    pre-defined option can be named like this in [~/tmp/instant.yml]
-
-      test:
-        server: test.server.com
-        dir: deploy/test
-        logfile: unicorn.stdout.log
-
-    You can use this option like this.
-
-      $ gitup -p test
+Usage: gitup send [stage] [options]
+  server, user, dir option:
+    orverride .gitup.yml configuration
 
   commit option:
     commit option does not have default value.
@@ -121,8 +110,8 @@ Usage: gitup send [options]
     Refer to `git diff --name-status`
     (git 1.7 or higher version required)
 
-  untracked option:
-    use this option to include untracked files.
+  ignore untracked option:
+    use this option to ignore untracked files.
 
   restart option:
     this option does not have value.
@@ -157,8 +146,8 @@ Usage: gitup send [options]
   opts.on("-c", "--commit SHA", "Commit SHA") do |f|
     command_options.commit = f
   end
-  opts.on("-u", "--untracked", "Upload untracked files") do |f|
-    command_options.untracked = f
+  opts.on("-u", "--ignore-untracked", "ignore untracked files") do |f|
+    command_options.ignore_untracked = true
   end
   opts.on("-r", "--restart", "Restart server") do |f|
     command_options.restart = f
@@ -173,23 +162,12 @@ Usage: gitup send [options]
     puts opts.help
     exit
   end
-  opts.on("-p", "--predefine NUMBER", "Predefined option") do |f|
-    command_options.predefine = f
-  end
 end
 
 opts.parse!(ARGV)
-
-if command_options.predefine
-  if GITUP_CONFIG["predefine"][command_options.predefine].nil?
-    puts "ERROR: '#{command_options.predefine}' is not pre-defined in '#{GITUP_CONFIG_FILE}'\n"
-    exit
-  end
-  options.set(GITUP_CONFIG["predefine"][command_options.predefine])
-else
-  options.set(GITUP_CONFIG['default'])
-end
-
+stage = opts.default_argv.first
+stage = 'default' if stage.nil? || stage.start_with?('-')
+options.set(GITUP_CONFIG[stage])
 options.set(command_options)
 puts ""
 options.print
@@ -202,7 +180,7 @@ end
 available_servers = GITUP_CONFIG['available_servers']
 unless available_servers
   puts "ERROR: #{GITUP_CONFIG_FILE} doesn't have available_servers configuration"
-  puts "  example, available_servers: ['dev1', 'dev2']"
+  puts "  #{available_servers.join(' ')}"
   exit
 end
 
@@ -241,7 +219,7 @@ status.split(/(\r\n|\r|\n)/).each do |st|
   end
 end
 
-if options.untracked
+unless options.ignore_untracked
   dirties = `git status --short`
   dirties.split(/(\r\n|\r|\n)/).each do |dirty|
     next if dirty.chomp.empty?
