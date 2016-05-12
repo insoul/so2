@@ -11,7 +11,5 @@ Edit `~/project/.gitup.yml`
 
 # Usage
 ```bash
-gitup send
-
-gitup send --server dev_server --restart
+gitup send dev_server
 ```
