@@ -14,82 +14,8 @@ unless File.exists?(".git")
   exit
 end
 
-class Option
-  OPTION_NAMES = %w{
-    server dir logfile
-    restart_cmd start_cmd stop_cmd
-    restart tailog ignore_untracked
-  }
-
-  def initialize(options)
-    @options = OpenStruct.new
-    set(options)
-  end
-
-  def checkin(key, value)
-    return false if value.nil?
-    return false if value.is_a? String and value.length == 0
-    return false if (value.is_a? Hash or value.is_a? Array) and value.empty?
-    @options.send("#{key}=", value)
-    true
-  end
-
-  def set(options)
-    if options.is_a? Hash
-      OPTION_NAMES.each do |o|
-        checkin(o, options[o])
-      end
-    elsif options.is_a? OpenStruct
-      OPTION_NAMES.each do |o|
-        checkin(o, options.send(o))
-      end
-    elsif options.nil?
-    else
-      raise "Unsupported class for options"
-    end
-  end
-
-  def method_missing(name, *args, &block)
-    @options.send(name)
-  end
-
-  def address
-    if @options.user
-      "#{@options.user}@#{@options.server}"
-    else
-      @options.server
-    end
-  end
-
-  def ssh_opt
-    opt = ''
-    if @options.pem
-      pem = @options.pem.gsub(/\$HOME/, ENV['HOME'])
-      opt += "-i #{pem}"
-    end
-    opt
-  end
-
-  def ssh(command)
-    system("ssh #{ssh_opt} #{address} 'cd #{@options.dir}; #{command}'")
-  end
-
-  def out(command)
-    `ssh #{ssh_opt} #{address} 'cd #{@options.dir}; #{command}'`
-  end
-
-  def scp(file)
-    system("scp #{ssh_opt} #{file} #{address}:#{@options.dir}/#{file}")
-  end
-
-  def print
-    puts "Current options"
-    OPTION_NAMES.each do |o|
-      puts "\t#{o}: #{send(o)}"
-    end
-    puts ""
-  end
-end
+require 'option'
+require 'git_repo'
 
 options = Option.new(GITUP_CONFIG["default"])
 
@@ -143,9 +69,6 @@ Usage: gitup send [stage] [options]
   opts.on("-d", "--dir DIR", "Directory for deployment") do |f|
     command_options.dir = f
   end
-  opts.on("-c", "--commit SHA", "Commit SHA") do |f|
-    command_options.commit = f
-  end
   opts.on("-u", "--ignore-untracked", "ignore untracked files") do |f|
     command_options.ignore_untracked = true
   end
@@ -157,6 +80,11 @@ Usage: gitup send [stage] [options]
   end
   opts.on("-t", "--tailog", "Tail log after restarting server") do |f|
     command_options.tailog = f
+  end
+  opts.on("--dry", "Donot restart server") do |f|
+    command_options.restart = !f
+    command_options.restart_force = !f
+    command_options.taillog = !f
   end
   opts.on_tail('-h', "--help", "Show this message") do
     puts opts.help
@@ -196,44 +124,11 @@ unless available
   exit
 end
 
-puts "Parsing git status And Upload"
-js_changed = false
-if options.commit
-  status = `git diff --name-status #{options.commit}`
-else
-  status = `git diff --name-status`
-  status << `git diff --name-status --cached`
-end
-puts status
 
-status.split(/(\r\n|\r|\n)/).each do |st|
-  next if st.chomp.empty?
-  mod, file = st.strip.split(/\s+/)
-  case mod
-    when "M", "A" then
-      puts "\n#{mod} #{file}"
-      js_changed = true if file =~ /.*\.js/
-      options.scp(file)
-    else
-      puts "\n#{mod} #{file} skipped"
-  end
-end
+# TODO generate js files if js_changed
 
-unless options.ignore_untracked
-  dirties = `git status --short`
-  dirties.split(/(\r\n|\r|\n)/).each do |dirty|
-    next if dirty.chomp.empty?
-    mod, file = dirty.strip.split(/\s+/)
-    if mod == "??"
-      puts "\n#{mod} #{file}"
-      js_changed = true if file =~ /.*\.js/
-      options.scp(file)
-    end
-  end
-end
-puts ""
-
-# generate js files if js_changed
+git_repo = GitRepo.new(File.expand_path('.'), options)
+git_repo.upload
 
 if options.restart and options.restart_cmd
   puts "Restart server"

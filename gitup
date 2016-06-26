@@ -2,6 +2,8 @@
 require 'optparse'
 require 'ostruct'
 require 'yaml'
+require 'pry'
+$LOAD_PATH << File.expand_path('../lib', __FILE__)
 
 GITUP_ROOT = "#{File.expand_path('..', __FILE__)}"
 GITUP_SETTING_FILE = "#{GITUP_ROOT}/setting.yml"
