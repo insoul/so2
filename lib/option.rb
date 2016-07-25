@@ -1,6 +1,6 @@
 class Option
   OPTION_NAMES = %w{
-    server dir logfile
+    user server dir logfile
     restart_cmd start_cmd stop_cmd
     restart tailog ignore_untracked
   }
