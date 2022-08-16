@@ -63,6 +63,9 @@ Usage: gitup send [stage] [options]
   opts.on("-s", "--server HOSTNAME", "Target server to upload") do |f|
     command_options.server = f
   end
+  opts.on("-p", "--pod-regex POD", "Target kube pod to upload as regular expression") do |f|
+    command_options.pod_regex = f
+  end
   opts.on("-u", "--user USER", "User to ssh login") do |f|
     command_options.user = f
   end
@@ -105,7 +108,7 @@ if options.server.nil? or options.server.empty?
   exit
 end
 
-available_servers = GITUP_CONFIG['available_servers']
+available_servers = GITUP_CONFIG['available_servers'] + ['kube']
 unless available_servers
   puts "ERROR: #{GITUP_CONFIG_FILE} doesn't have available_servers configuration"
   puts "  #{available_servers.join(' ')}"
@@ -126,7 +129,7 @@ end
 
 
 # TODO generate js files if js_changed
-
+options.preprocess
 git_repo = GitRepo.new(File.expand_path('.'), options)
 git_repo.upload
 
