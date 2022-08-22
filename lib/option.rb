@@ -3,7 +3,7 @@ class Option
     user server kube dir logfile
     restart_cmd start_cmd stop_cmd
     restart tailog ignore_untracked
-    pod_regex
+    pod_regex ignore
   }
 
   attr_accessor :prefix
@@ -110,6 +110,10 @@ class Option
   end
 
   def scp(file)
+    if @options.ignore.find{|ig| file.start_with?(ig)}
+      puts "ignored: #{file}"
+      return
+    end
     if kube?
       kube_remote_files(file).each_pair do |svr, remote_file|
         cmd0 = "kubectl cp #{local_file(file)} #{remote_file} -c #{@kube['container'] || 'main'}"
