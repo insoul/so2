@@ -102,7 +102,9 @@ class Option
     res = res.split
     raise 'kube.pod_regex or --pod-regex option is blank' if kube_pod_regex.nil?
     res = res.select{|l| l =~ /#{@kube['pod_regex']}/}
-    res.map{|l| l.split('/').last}
+    res = res.map{|l| l.split('/').last}
+    puts (['kube servers'] + res).join("\n  ")
+    res
   end
 
   def kube_remote_files(file)
@@ -119,7 +121,7 @@ class Option
         cmd0 = "kubectl cp #{local_file(file)} #{remote_file} -c #{@kube['container'] || 'main'}"
         puts cmd0
         system cmd0
-        cmd1 = "kubectl exec -it #{svr} -c #{@kube['container'] || 'main'} -- chown root:root #{local_file(file)}"
+        cmd1 = "kubectl exec -n #{@kube['namespace']} -it #{svr} -c #{@kube['container'] || 'main'} -- chown root:root #{local_file(file)}"
         puts cmd1
         system cmd1
       end
