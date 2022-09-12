@@ -1,4 +1,4 @@
-class Option
+class SendOption
   OPTION_NAMES = %w{
     user server kube dir logfile
     restart_cmd start_cmd stop_cmd

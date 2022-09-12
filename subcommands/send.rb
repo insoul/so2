@@ -14,18 +14,18 @@ unless File.exists?(".git")
   exit
 end
 
-require 'option'
+require 'send_option'
 require 'git_repo'
 
-options = Option.new(GITUP_CONFIG["default"])
+options = SendOption.new(SO2_CONFIG["default"])
 
 command_options = OpenStruct.new
 opts = OptionParser.new do |opts|
   opts.banner = <<-EOS
 
-Usage: gitup send [stage] [options]
+Usage: so2 send [stage] [options]
   server, user, dir option:
-    orverride .gitup.yml configuration
+    orverride .so2.yml configuration
 
   commit option:
     commit option does not have default value.
@@ -98,7 +98,7 @@ end
 opts.parse!(ARGV)
 stage = opts.default_argv.first
 stage = 'default' if stage.nil? || stage.start_with?('-')
-options.set(GITUP_CONFIG[stage])
+options.set(SO2_CONFIG[stage])
 options.set(command_options)
 puts ""
 options.print
@@ -108,9 +108,9 @@ if options.server.nil? or options.server.empty?
   exit
 end
 
-available_servers = GITUP_CONFIG['available_servers'] + ['kube']
+available_servers = SO2_CONFIG['available_servers'] + ['kube']
 unless available_servers
-  puts "ERROR: #{GITUP_CONFIG_FILE} doesn't have available_servers configuration"
+  puts "ERROR: #{SO2_CONFIG_FILE} doesn't have available_servers configuration"
   puts "  #{available_servers.join(' ')}"
   exit
 end

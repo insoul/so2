@@ -3,11 +3,11 @@ require 'ostruct'
 command_options = OpenStruct.new
 opts = OptionParser.new do |opts|
   opts.banner = <<-EOS
-Usage: gitup config [-e|--edit]
-  By default, show #{GITUP_CONFIG_FILE}
+Usage: so2 config [-e|--edit]
+  By default, show #{SO2_CONFIG_FILE}
 
   edit options:
-    run #{GITUP_CONFIG_FILE} with
+    run #{SO2_CONFIG_FILE} with
   EOS
 
   opts.on("-e", "--edit") do |f|
@@ -17,10 +17,10 @@ end
 
 opts.parse(ARGV)
 
-editor = GITUP_SETTING["editor"] || "vim"
+editor = SO2_SETTING["editor"] || "vim"
 if command_options.edit
-  `#{editor} #{GITUP_CONFIG_FILE}`
+  `#{editor} #{SO2_CONFIG_FILE}`
 else
-  config_content = `cat #{GITUP_CONFIG_FILE}`
+  config_content = `cat #{SO2_CONFIG_FILE}`
   puts config_content
 end

@@ -5,25 +5,25 @@ require 'yaml'
 require 'pry'
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 
-GITUP_ROOT = "#{File.expand_path('..', __FILE__)}"
-GITUP_SETTING_FILE = "#{GITUP_ROOT}/setting.yml"
+SO2_ROOT = "#{File.expand_path('..', __FILE__)}"
+SO2_SETTING_FILE = "#{SO2_ROOT}/setting.yml"
 begin
-  GITUP_SETTING = YAML.load_file(GITUP_SETTING_FILE)
+  SO2_SETTING = YAML.load_file(SO2_SETTING_FILE)
 rescue Errno::ENOENT
-  puts "There is not #{GITUP_SETTING_FILE}"
+  puts "There is not #{SO2_SETTING_FILE}"
   exit
 end
 
-GITUP_CONFIG_FILE = "#{Dir.pwd}/.gitup.yml"
+SO2_CONFIG_FILE = "#{Dir.pwd}/.so2.yml"
 begin
-  GITUP_CONFIG = YAML.load_file(GITUP_CONFIG_FILE)
+  SO2_CONFIG = YAML.load_file(SO2_CONFIG_FILE)
 rescue Errno::ENOENT
-  puts "There is not #{GITUP_CONFIG_FILE}"
-  GITUP_CONFIG = {}
+  puts "There is not #{SO2_CONFIG_FILE}"
+  SO2_CONFIG = {}
 end
 
-@available_subcommand = Dir.entries("#{GITUP_ROOT}/subcommands").select { |f|
-  File.file?(File.join("#{GITUP_ROOT}/subcommands",f))
+@available_subcommand = Dir.entries("#{SO2_ROOT}/subcommands").select { |f|
+  File.file?(File.join("#{SO2_ROOT}/subcommands",f))
 }.map {|f| f.gsub("\.rb", "")}
 
 def puts_available_subcommand
@@ -35,7 +35,7 @@ end
 
 subcommand = ARGV.shift
 if ["--help", "-h", "", nil].include? subcommand
-  puts "usage: gitup [-h|--help] <command> [<args>]"
+  puts "usage: so2 [-h|--help] <command> [<args>]"
   puts ""
   puts_available_subcommand
   exit
