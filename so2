@@ -2,7 +2,9 @@
 require 'optparse'
 require 'ostruct'
 require 'yaml'
-require 'pry'
+# require 'pry'
+# require 'pry-byebug'
+# require 'pry-stack_explorer'
 $LOAD_PATH << File.expand_path('../lib', __FILE__)
 
 SO2_ROOT = "#{File.expand_path('..', __FILE__)}"

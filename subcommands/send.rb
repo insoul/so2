@@ -129,7 +129,6 @@ end
 
 
 # TODO generate js files if js_changed
-options.preprocess
 git_repo = GitRepo.new(File.expand_path('.'), options)
 git_repo.upload
 

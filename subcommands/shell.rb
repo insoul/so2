@@ -1,6 +1,6 @@
 require 'shell_option'
 
-options = ShellOption.new(GITUP_CONFIG['default'])
+options = ShellOption.new(SO2_CONFIG['default'])
 
 command_options = OpenStruct.new
 
@@ -13,9 +13,9 @@ end
 opts.parse!(ARGV)
 stage = opts.default_argv.first
 stage = 'default' if stage.nil? || stage.start_with?('-')
-options.set(GITUP_CONFIG[stage])
+options.set(SO2_CONFIG[stage])
 options.set(command_options)
 puts ""
 options.print
 
-options.ssh(options.shell_cmd)
+options.run
