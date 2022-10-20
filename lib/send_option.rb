@@ -1,11 +1,13 @@
 require 'option'
+require 'i18n'
 
 class SendOption < Option
   OPTION_NAMES = %w{
     user server kube dir logfile
     restart_cmd start_cmd stop_cmd
     restart tailog ignore_untracked
-    ignore
+    ignore files
+    send_scp_command
   }
   def self.option_names; OPTION_NAMES end
 
@@ -49,7 +51,7 @@ class SendOption < Option
   end
 
   def scp(file)
-    if @options.ignore.find{|ig| file.start_with?(ig)}
+    if @options.files.nil? && @options.ignore.find{|ig| files.start_with?(ig)}
       puts "ignored: #{file}"
       return
     end
@@ -63,7 +65,11 @@ class SendOption < Option
         system cmd1
       end
     else
-      cmd = "scp #{ssh_opt} #{local_file(file)} #{address}:#{remote_file(file)}"
+      if @options.send_scp_command
+        cmd = I18n.interpolate(@options.send_scp_command, local: local_file(file), remote: "#{address}:#{remote_file(file)}")
+      else
+        cmd = "scp #{ssh_opt} #{local_file(file)} #{address}:#{remote_file(file)}"
+      end
       puts cmd
       system cmd
     end

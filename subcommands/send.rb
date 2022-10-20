@@ -60,8 +60,8 @@ Usage: so2 send [stage] [options]
 
   EOS
 
-  opts.on("-s", "--server HOSTNAME", "Target server to upload") do |f|
-    command_options.server = f
+  opts.on("-s", "--stage STAGE", "Target stage to upload") do |f|
+    command_options.stage = f
   end
   opts.on("-p", "--pod-regex POD", "Target kube pod to upload as regular expression") do |f|
     command_options.pod_regex = f
@@ -84,6 +84,9 @@ Usage: so2 send [stage] [options]
   opts.on("-t", "--tailog", "Tail log after restarting server") do |f|
     command_options.tailog = f
   end
+  opts.on("-f", "--file", "Specify file to send") do |f|
+    command_options.file = f
+  end
   opts.on("--dry", "Donot restart server") do |f|
     command_options.restart = !f
     command_options.restart_force = !f
@@ -96,10 +99,13 @@ Usage: so2 send [stage] [options]
 end
 
 opts.parse!(ARGV)
-stage = opts.default_argv.first
-stage = 'default' if stage.nil? || stage.start_with?('-')
+stage = command_options.stage || 'default'
 options.set(SO2_CONFIG[stage])
 options.set(command_options)
+
+if opts.default_argv.any?
+  options.files = opts.default_argv
+end
 puts ""
 options.print
 
@@ -127,10 +133,15 @@ unless available
   exit
 end
 
-
-# TODO generate js files if js_changed
-git_repo = GitRepo.new(File.expand_path('.'), options)
-git_repo.upload
+if options.files
+  options.files.each do |file|
+    options.scp(file)
+  end
+else
+  # TODO generate js files if js_changed
+  git_repo = GitRepo.new(File.expand_path('.'), options)
+  git_repo.upload
+end
 
 if options.restart and options.restart_cmd
   puts "Restart server"
