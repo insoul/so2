@@ -61,14 +61,17 @@ class Option
   end
 
   def kube_servers
+    puts "kube servers"
     raise 'kube.namespace is blank' if @kube['namespace'].nil?
     cmd = "kubectl get pods --namespace #{@kube['namespace']} --output name"
     res = `#{cmd}`
+    puts res
     res = res.split
-    raise 'kube.pod_regex or --pod-regex option is blank' if kube_pod_regex.nil?
-    res = res.select{|l| l =~ /#{@kube['pod_regex']}/}
-    res = res.map{|l| l.split('/').last}
-    puts (['kube servers'] + res).join("\n  ")
+    if @kube['pod_regex']
+      res = res.select{|l| l =~ /#{@kube['pod_regex']}/}
+      res = res.map{|l| l.split('/').last}
+      puts (["pod_regex '#{@kube['pod_regex']}' filtered servers"] + res).join("\n  ")
+    end
     res
   end
 
