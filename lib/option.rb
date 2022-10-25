@@ -11,14 +11,6 @@ class Option
   def initialize(options)
     @options = OpenStruct.new
     set(options)
-
-    if kube?
-      @kube = @options.kube
-      raise 'kube.context is blank' if @kube['context'].nil?
-      cmd = "kubectl config use-context #{@kube['context']}"
-      puts cmd
-      system cmd
-    end
   end
 
   def method_missing(name, *args, &block)
@@ -78,5 +70,15 @@ class Option
     res = res.map{|l| l.split('/').last}
     puts (['kube servers'] + res).join("\n  ")
     res
+  end
+
+  def kube_init!
+    if kube?
+      @kube = @options.kube
+      raise 'kube.context is blank' if @kube['context'].nil?
+      cmd = "kubectl config use-context #{@kube['context']}"
+      puts cmd
+      system cmd
+    end
   end
 end

@@ -100,8 +100,13 @@ end
 
 opts.parse!(ARGV)
 stage = command_options.stage || 'default'
+unless (SO2_CONFIG[stage]['available_subcommands'] || []).include?('send')
+  puts "#{stage} stage not allowed command 'send'"
+  exit
+end
 options.set(SO2_CONFIG[stage])
 options.set(command_options)
+options.kube_init!
 
 if opts.default_argv.any?
   options.files = opts.default_argv

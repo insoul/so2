@@ -12,8 +12,13 @@ end
 
 opts.parse!(ARGV)
 stage = command_options.stage || 'default'
+unless (SO2_CONFIG[stage]['available_subcommands'] || []).include?('shell')
+  puts "#{stage} stage not allowed command 'shell'"
+  exit
+end
 options.set(SO2_CONFIG[stage])
 options.set(command_options)
+options.kube_init!
 puts ""
 options.print
 
