@@ -9,6 +9,7 @@ $LOAD_PATH << File.expand_path('../lib', __FILE__)
 
 SO2_ROOT = "#{File.expand_path('..', __FILE__)}"
 SO2_SETTING_FILE = "#{SO2_ROOT}/setting.yml"
+
 begin
   SO2_SETTING = YAML.load_file(SO2_SETTING_FILE)
 rescue Errno::ENOENT
@@ -16,7 +17,10 @@ rescue Errno::ENOENT
   exit
 end
 
-SO2_CONFIG_FILE = "#{Dir.pwd}/.so2.yml"
+prj_root = `git rev-parse --show-superproject-working-tree`.strip
+prj_root = `git rev-parse --show-toplevel`.strip if prj_root.empty?
+PRJ_ROOT = prj_root
+SO2_CONFIG_FILE = "#{prj_root}/.so2.yml"
 begin
   SO2_CONFIG = YAML.load_file(SO2_CONFIG_FILE)
 rescue Errno::ENOENT

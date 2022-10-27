@@ -64,6 +64,7 @@ class Option
     puts "kube servers"
     raise 'kube.namespace is blank' if @kube['namespace'].nil?
     cmd = "kubectl get pods --namespace #{@kube['namespace']} --output name"
+    puts cmd
     res = `#{cmd}`
     puts res
     res = res.split
