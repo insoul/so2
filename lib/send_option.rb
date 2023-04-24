@@ -51,7 +51,7 @@ class SendOption < Option
   end
 
   def scp(file)
-    if @options.files.nil? && @options.ignore.find{|ig| files.start_with?(ig)}
+    if @options.ignore && @options.ignore.find{|ig| file.start_with?(ig)}
       puts "ignored: #{file}"
       return
     end

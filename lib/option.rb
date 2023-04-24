@@ -63,7 +63,7 @@ class Option
   def kube_servers
     puts "kube servers"
     raise 'kube.namespace is blank' if @kube['namespace'].nil?
-    cmd = "kubectl get pods --namespace #{@kube['namespace']} --output name"
+    cmd = "kubectl get pods --context #{@kube['context']} --namespace #{@kube['namespace']} --output name"
     puts cmd
     res = `#{cmd}`
     puts res

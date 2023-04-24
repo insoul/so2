@@ -22,6 +22,8 @@ prj_root = `git rev-parse --show-toplevel`.strip if prj_root.empty?
 PRJ_ROOT = prj_root
 SO2_CONFIG_FILE = "#{prj_root}/.so2.yml"
 begin
+  SO2_CONFIG = YAML.load_file(SO2_CONFIG_FILE, aliases: true)
+rescue ArgumentError
   SO2_CONFIG = YAML.load_file(SO2_CONFIG_FILE)
 rescue Errno::ENOENT
   puts "There is not #{SO2_CONFIG_FILE}"

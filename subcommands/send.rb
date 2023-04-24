@@ -101,7 +101,7 @@ end
 opts.parse!(ARGV)
 stage = command_options.stage || 'default'
 unless (SO2_CONFIG[stage]['available_subcommands'] || []).include?('send')
-  puts "#{stage} stage not allowed command 'send'"
+  puts "\"#{stage}\" stage not allowed command 'send'"
   exit
 end
 options.set(SO2_CONFIG[stage])
