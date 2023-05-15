@@ -56,6 +56,10 @@ class Option
     @options.server == 'kube'
   end
 
+  def kube_env
+    (@kube['env'] || {}).map{|k,v| "#{k}=#{v}"}.join(' ')
+  end
+
   def kube_pod_regex
     @options.pod_regex || @kube['pod_regex']
   end
@@ -63,7 +67,7 @@ class Option
   def kube_servers
     puts "kube servers"
     raise 'kube.namespace is blank' if @kube['namespace'].nil?
-    cmd = "kubectl get pods --context #{@kube['context']} --namespace #{@kube['namespace']} --output name"
+    cmd = "#{kube_env} kubectl get pods --context #{@kube['context']} --namespace #{@kube['namespace']} --output name"
     puts cmd
     res = `#{cmd}`
     puts res

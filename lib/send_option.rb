@@ -57,10 +57,10 @@ class SendOption < Option
     end
     if kube?
       kube_remote_files(file).each_pair do |svr, remote_file|
-        cmd0 = "kubectl cp #{local_file(file)} #{remote_file} -c #{@kube['container'] || 'main'}"
+        cmd0 = [kube_env, "kubectl cp #{local_file(file)} #{remote_file} -c #{@kube['container'] || 'main'}"].join(' ')
         puts cmd0
         system cmd0
-        cmd1 = "kubectl exec -n #{@kube['namespace']} -it #{svr} -c #{@kube['container'] || 'main'} -- chown root:root #{local_file(file)}"
+        cmd1 = [kube_env, "kubectl exec -n #{@kube['namespace']} -it #{svr} -c #{@kube['container'] || 'main'} -- chown root:root #{local_file(file)}"].join(' ')
         puts cmd1
         system cmd1
       end
