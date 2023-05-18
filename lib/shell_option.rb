@@ -19,7 +19,7 @@ class ShellOption < Option
   def run
     if kube?
       svr = kube_servers.last
-      cmd = "kubectl exec -n #{@kube['namespace']} -it #{svr} -c #{@kube['container'] || 'main'} -- /bin/bash"
+      cmd = [kube_env, "kubectl exec -n #{@kube['namespace']} -it #{svr} -c #{@kube['container'] || 'main'} -- /bin/bash"].join(' ')
       puts cmd
       system cmd
     else
