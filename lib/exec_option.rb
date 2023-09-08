@@ -20,14 +20,15 @@ class ExecOption < Option
       kube_servers.each do |svr|
         cmd = [kube_env, "kubectl exec -n #{@kube['namespace']} -it #{svr} -c #{@kube['container'] || 'main'} -- #{ARGV.join(' ')}"].join(' ')
         puts cmd
-        out = system(cmd)
-        puts out
-        Kernel.print("Continue? [Y/n] ")
+        Kernel.print("Execute? [Y/n] ")
         inp = STDIN.getch
         puts inp
         if ['y', 'Y'].include?(inp)
+          out = system(cmd)
+          puts out
           next
         else
+          puts 'STOP!!'
           break
         end
       end

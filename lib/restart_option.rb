@@ -21,14 +21,15 @@ class RestartOption < Option
       kube_servers.each do |svr|
         cmd = [kube_env, "kubectl exec -n #{@kube['namespace']} -it #{svr} -c #{@kube['container'] || 'main'} -- #{@options.restart_cmd}"].join(' ')
         puts cmd
-        out = system(cmd)
-        puts out
-        Kernel.print("Continue? [Y/n] ")
+        Kernel.print("Restart? [Y/n] ")
         inp = STDIN.getch
         puts inp
         if ['y', 'Y'].include?(inp)
+          out = system(cmd)
+          puts out
           next
         else
+          puts 'STOP!!'
           break
         end
       end
