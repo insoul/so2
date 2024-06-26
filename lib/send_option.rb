@@ -46,6 +46,10 @@ class SendOption < Option
     prefix ? File.join(@options.dir, prefix, file) : File.join(@options.dir, file)
   end
 
+  def filename(file)
+    file.split('/').last
+  end
+
   def kube_remote_files(file)
     Hash[
       kube_servers.map do |svr| 
@@ -69,6 +73,20 @@ class SendOption < Option
         puts cmd1
         system cmd1
       end
+    elsif @options.server == 'ssm'
+      raise "ssm must be defined" if @options.ssm.nil?
+      raise "ssm.s3_bucket must be defined" if @options.ssm['s3_bucket'].nil?
+      bucket = @options.ssm['s3_bucket']
+      cmd0 = "aws s3 cp #{file} s3://#{bucket}/#{filename(file)}"
+      cmd1 = "aws ssm send-command" \
+        " --document-name AWS-RunShellScript" \
+        " --targets Key=instanceids,Values=#{@options.ssm['instance_id']}" \
+        " --parameters 'commands=[\"aws s3 cp s3://#{bucket}/#{filename(file)} #{@options.ssm['project_path']}/#{file}\"]'" \
+        " --output text"
+      puts cmd0
+      system cmd0
+      puts cmd1
+      system cmd1
     else
       if @options.send_scp_command
         cmd = I18n.interpolate(@options.send_scp_command, local: local_file(file), remote: "#{address}:#{remote_file(file)}")

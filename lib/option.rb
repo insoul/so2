@@ -55,6 +55,10 @@ class Option
     @options.server == 'kube'
   end
 
+  def ssm?
+    @options.server == 'ssm'
+  end
+
   def kube_env
     (@kube['env'] || {}).map{|k,v| "#{k}=#{v}"}.join(' ')
   end

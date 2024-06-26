@@ -22,6 +22,11 @@ class ShellOption < Option
       cmd = [kube_env, "kubectl exec -n #{@kube['namespace']} --context #{@kube['context']} -c #{@kube['container'] || 'main'} -it #{svr} -- /bin/bash"].join(' ')
       puts cmd
       system cmd
+    elsif @options.server == 'ssm'
+      raise 'ssm.instance_id is blank' if @options.ssm['instance_id'].nil?
+      cmd = "aws ssm start-session --target #{@options.ssm['instance_id']}"
+      puts cmd
+      system cmd
     else
       if @options.shell_ssh_command
         cmd = I18n.interpolate(@options.shell_ssh_command, address: address)
