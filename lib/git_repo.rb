@@ -53,8 +53,24 @@ class GitRepo
     @submodules = submodule_dirs.map{|e| self.class.new(e)}
   end
 
+  def submodule(path)
+    submodules.find{|e| e.root == path}
+  end
+
   def submodule?(path)
     submodules.index{|e| e.root == path}
+  end
+
+  def pull
+    cmd = "cd #{root} && git pull"
+    puts cmd
+    system cmd
+  end
+
+  def checkout(branch)
+    cmd = "cd #{root} && git checkout #{branch}"
+    puts cmd
+    system cmd
   end
 
   def this_changes
@@ -99,12 +115,28 @@ class GitRepo
     @changes = this_changes.map(&:this_changes).flatten
   end
 
+  def changed_submodules
+    this_changes.select{|e| e.mod == 'M'}.map{|e| submodule(e.file)}.compact
+  end
+
   def upload
     this_changes.each do |change|
       if change.mod == '??' && options.ignore_untracked
         puts "ignore_untracked: #{change}"
       else
         change.upload
+      end
+    end
+  end
+
+  def run
+    if @options.changed_submodule_update
+      changed_submodules.each do |sm|
+        sm.pull
+      end
+    elsif @options.changed_submodule_checkout
+      changed_submodules.each do |sm|
+        sm.checkout(@options.changed_submodule_checkout)
       end
     end
   end

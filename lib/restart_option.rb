@@ -28,6 +28,9 @@ class RestartOption < Option
           out = system(cmd)
           puts out
           next
+        elsif ['n', 'N'].include?(inp)
+          puts 'SKIP!!'
+          next
         else
           puts 'STOP!!'
           break

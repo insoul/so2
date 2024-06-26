@@ -47,7 +47,12 @@ class SendOption < Option
   end
 
   def kube_remote_files(file)
-    Hash[kube_servers.map{|svr| [svr, "#{@kube['namespace']}/#{svr}:#{@kube['path']}#{local_file(file)}"]}]
+    Hash[
+      kube_servers.map do |svr| 
+        svr = svr[4..-1] if svr.start_with?('pod/')
+        [svr, "#{@kube['namespace']}/#{svr}:#{@kube['path']}#{local_file(file)}"]
+      end
+    ]
   end
 
   def scp(file)

@@ -1,6 +1,6 @@
-require 'shell_option'
+require 'servers_option'
 
-options = ShellOption.new(SO2_CONFIG['default'])
+options = ServersOption.new(SO2_CONFIG['default'])
 
 command_options = OpenStruct.new
 

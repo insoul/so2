@@ -21,26 +21,25 @@ class Option
     return false if value.nil?
     return false if value.is_a? String and value.length == 0
     return false if (value.is_a? Hash or value.is_a? Array) and value.empty?
+    unless option_names.include?(key.to_s)
+      puts "WARN: #{key} is not defined in #{self.class.name}#options_names #{self.class.option_names.inspect}"
+    end
     @options.send("#{key}=", value)
     true
   end
 
   def set(options)
+    options = options.to_h if options.is_a? OpenStruct
     if options.is_a? Hash
-      option_names.each do |o|
-        checkin(o, options[o])
-      end
-    elsif options.is_a? OpenStruct
-      option_names.each do |o|
-        checkin(o, options.send(o))
+      options.each do |k,v|
+        checkin(k, options[k])
       end
     elsif options.is_a? self.class
-      option_names.each do |o|
-        checkin(o, options.instance_variable_get(:@options).send(o))
+      options.instance_variables.each do |ivn|
+        checkin(ivn.to_s[1..-1], options.instance_variable_get(ivn))
       end
-    elsif options.nil?
     else
-      raise "Unsupported class for options"
+      raise "Unsupported class for options: #{options.class.name}"
     end
   end
 
@@ -72,10 +71,10 @@ class Option
     res = `#{cmd}`
     puts res
     res = res.split
-    if @kube['pod_regex']
-      res = res.select{|l| l =~ /#{@kube['pod_regex']}/}
+    if kube_pod_regex
+      res = res.select{|l| l =~ /#{kube_pod_regex}/}
       res = res.map{|l| l.split('/').last}
-      puts (["pod_regex '#{@kube['pod_regex']}' filtered servers"] + res).join("\n  ")
+      puts (["pod_regex '#{kube_pod_regex}' filtered servers"] + res).join("\n  ")
     end
     res
   end
