@@ -81,12 +81,18 @@ class SendOption < Option
       cmd1 = "aws ssm send-command" \
         " --document-name AWS-RunShellScript" \
         " --targets Key=instanceids,Values=#{@options.ssm['instance_id']}" \
-        " --parameters 'commands=[\"aws s3 cp s3://#{bucket}/#{filename(file)} #{@options.ssm['project_path']}/#{file}\"]'" \
+        " --parameters 'commands=[\"cd #{@options.ssm['project_path']} && aws s3 cp s3://#{bucket}/#{filename(file)} #{file}\"]'" \
         " --output text"
       puts cmd0
       system cmd0
       puts cmd1
-      system cmd1
+      output = `#{cmd1}`
+      puts output
+      output_lines = output.split("\n")
+      command_id = output_lines[0].split("\t")[1]
+      cmd2 = "aws ssm list-command-invocations --command-id #{command_id} --details --query 'CommandInvocations[0].{Status:StatusDetails,Output:CommandPlugins[0].Output}'"
+      puts cmd2
+      system cmd2
     else
       if @options.send_scp_command
         cmd = I18n.interpolate(@options.send_scp_command, local: local_file(file), remote: "#{address}:#{remote_file(file)}")
